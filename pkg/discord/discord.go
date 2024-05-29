@@ -60,50 +60,54 @@ func (d *Discord) MessageCreate(s *discordgo.Session, m *discordgo.MessageCreate
 	}
 
 	if strings.Contains(m.Content, "$request") {
-		d.logger.Info().Msgf("user %s requested funds to %s", m.Author, m.Content)
-		addr := strings.Split(m.Content, "$request ")[1]
-		if addr == "" {
-			d.logger.Error().Msgf("missing address for user %s", m.Author)
-			return
-		}
+		go d.requestFunds(m)
+	}
+}
 
-		if user, found := d.Requests[m.Author.Username]; found {
-			now := time.Now()
-			diff := now.Sub(user)
-			if diff < d.Faucet.Cooldown {
-				waitTime := d.Faucet.Cooldown - diff
-				_, err := d.Session.ChannelMessageSend(
-					m.ChannelID,
-					fmt.Sprintf(":red_circle: user %s needs to wait for %v",
-						m.Author.Username,
-						waitTime,
-					))
-				if err != nil {
-					d.logger.Error().Err(err).Msgf("failed to send message")
-					return
-				}
+func (d *Discord) requestFunds(m *discordgo.MessageCreate) {
+	d.logger.Info().Msgf("user %s requested funds to %s", m.Author, m.Content)
+	addr := strings.Split(m.Content, "$request ")[1]
+	if addr == "" {
+		d.logger.Error().Msgf("missing address for user %s", m.Author)
+		return
+	}
+
+	if user, found := d.Requests[m.Author.Username]; found {
+		now := time.Now()
+		diff := now.Sub(user)
+		if diff < d.Faucet.Cooldown {
+			waitTime := d.Faucet.Cooldown - diff
+			_, err := d.Session.ChannelMessageSend(
+				m.ChannelID,
+				fmt.Sprintf(":red_circle: user %s needs to wait for %v",
+					m.Author.Username,
+					waitTime,
+				))
+			if err != nil {
+				d.logger.Error().Err(err).Msgf("failed to send message")
 				return
 			}
-		}
-
-		var returnMsg string
-		tx, err := d.Faucet.Send(addr)
-		if err != nil {
-			d.logger.Error().Err(err).Msgf("failed to send funds to %s", addr)
-			returnMsg = fmt.Sprintf(":red_circle: %s", err)
-		} else {
-			returnMsg = fmt.Sprintf(
-				":white_check_mark: 10 WARD sent to address %s \n %s",
-				addr,
-				fmt.Sprintf("https://testnet.warden.explorers.guru/transaction/%s", tx),
-			)
-			d.Requests[m.Author.Username] = time.Now()
-			d.Faucet.Requests[addr] = time.Now()
-		}
-		_, err = d.Session.ChannelMessageSend(m.ChannelID, returnMsg)
-		if err != nil {
-			d.logger.Error().Err(err).Msgf("failed to send message")
 			return
 		}
+	}
+
+	var returnMsg string
+	tx, err := d.Faucet.Send(addr)
+	if err != nil {
+		d.logger.Error().Err(err).Msgf("failed to send funds to %s", addr)
+		returnMsg = fmt.Sprintf(":red_circle: %s", err)
+	} else {
+		returnMsg = fmt.Sprintf(
+			":white_check_mark: 10 WARD sent to address %s \n %s",
+			addr,
+			fmt.Sprintf("https://testnet.warden.explorers.guru/transaction/%s", tx),
+		)
+		d.Requests[m.Author.Username] = time.Now()
+		d.Faucet.Requests[addr] = time.Now()
+	}
+	_, err = d.Session.ChannelMessageSend(m.ChannelID, returnMsg)
+	if err != nil {
+		d.logger.Error().Err(err).Msgf("failed to send message")
+		return
 	}
 }
