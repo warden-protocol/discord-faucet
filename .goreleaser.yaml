@@ -1,0 +1,137 @@
+---
+project_name: discord-faucet
+before:
+  hooks:
+    - go mod tidy
+env:
+  - CGO_ENABLED=1
+builds:
+  - id: discord-faucet-linux-amd64
+    main: ./cmd/discord-faucet/discord-faucet.go
+    binary: discord-faucet
+    env:
+      - CC=x86_64-linux-gnu-gcc
+      - CXX=x86_64-linux-gnu-g++
+    goos:
+      - linux
+    goarch:
+      - amd64
+    flags:
+      - -mod=readonly
+      - -trimpath
+    ldflags:
+      - -X main.version={{ .Version }}
+      - -X main.commit={{ .Commit }}
+      - -X main.date={{ .CommitDate }}
+      - -s -w
+      - -linkmode=external
+      - -extldflags '-Wl,-z,muldefs --static -lm'
+    tags:
+      - netgo
+      - muslc
+
+  - id: discord-faucet-linux-arm64
+    main: ./cmd/discord-faucet/discord-faucet.go
+    binary: discord-faucet
+    env:
+      - CC=aarch64-linux-gnu-gcc
+      - CXX=aarch64-linux-gnu-g++
+    goos:
+      - linux
+    goarch:
+      - arm64
+    flags:
+      - -mod=readonly
+      - -trimpath
+    ldflags:
+      - -X main.version={{ .Version }}
+      - -X main.commit={{ .Commit }}
+      - -X main.date={{ .CommitDate }}
+      - -s -w
+      - -linkmode=external
+      - -extldflags '-Wl,-z,muldefs --static -lm'
+    tags:
+      - netgo
+      - muslc
+
+  - id: discord-faucet-darwin-amd64
+    main: ./cmd/discord-faucet/discord-faucet.go
+    binary: discord-faucet
+    env:
+      - CC=o64-clang
+      - CGO_LDFLAGS=-L/lib
+    goos:
+      - darwin
+    goarch:
+      - amd64
+    flags:
+      - -mod=readonly
+      - -trimpath
+    ldflags:
+      - -X main.version={{ .Version }}
+      - -X main.commit={{ .Commit }}
+      - -X main.date={{ .CommitDate }}
+      - -w -s
+      - -linkmode=external
+    tags:
+      - netgo
+
+  - id: discord-faucet-darwin-arm64
+    main: ./cmd/discord-faucet/discord-faucet.go
+    binary: discord-faucet
+    env:
+      - CC=oa64-clang
+      - CGO_LDFLAGS=-L/lib
+    goos:
+      - darwin
+    goarch:
+      - arm64
+    flags:
+      - -mod=readonly
+      - -trimpath
+    ldflags:
+      - -X main.version={{ .Version }}
+      - -X main.commit={{ .Commit }}
+      - -X main.date={{ .CommitDate }}
+      - -w -s
+      - -linkmode=external
+    tags:
+      - netgo
+
+universal_binaries:
+  - id: discord-faucet-darwin-all
+    ids:
+      - discord-faucet-darwin-amd64
+      - discord-faucet-darwin-arm64
+    replace: false
+
+dockers:
+  - use: buildx
+    goos: linux
+    goarch: amd64
+    image_templates:
+      - "ghcr.io/warden-protocol/{{ .ProjectName }}:{{ .Version }}-amd64"
+    build_flag_templates:
+      - "--pull"
+      - "--platform=linux/amd64"
+      - "--label=org.opencontainers.image.created={{.Date}}"
+      - "--label=org.opencontainers.image.title={{.ProjectName}}"
+      - "--label=org.opencontainers.image.revision={{.FullCommit}}"
+      - "--label=org.opencontainers.image.version={{.Version}}"
+  - use: buildx
+    goos: linux
+    goarch: arm64
+    image_templates:
+      - "ghcr.io/warden-protocol/{{ .ProjectName }}:{{ .Version }}-arm64v8"
+    build_flag_templates:
+      - "--pull"
+      - "--platform=linux/arm64"
+      - "--label=org.opencontainers.image.created={{.Date}}"
+      - "--label=org.opencontainers.image.title={{.ProjectName}}"
+      - "--label=org.opencontainers.image.revision={{.FullCommit}}"
+      - "--label=org.opencontainers.image.version={{.Version}}"
+docker_manifests:
+  - name_template: ghcr.io/warden-protocol/{{ .ProjectName }}:{{ .Version }}
+    image_templates:
+      - ghcr.io/warden-protocol/{{ .ProjectName }}:{{ .Version }}-amd64
+      - ghcr.io/warden-protocol/{{ .ProjectName }}:{{ .Version }}-arm64v8
