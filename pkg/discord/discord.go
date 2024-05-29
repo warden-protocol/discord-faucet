@@ -92,7 +92,7 @@ func (d *Discord) requestFunds(m *discordgo.MessageCreate) {
 	}
 
 	var returnMsg string
-	tx, err := d.Faucet.Send(addr)
+	tx, err := d.Faucet.Send(addr, 1)
 	if err != nil {
 		d.logger.Error().Err(err).Msgf("failed to send funds to %s", addr)
 		returnMsg = fmt.Sprintf(":red_circle: %s", err)
