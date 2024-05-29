@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.1.0](https://github.com/warden-protocol/discord-faucet/compare/v1.0.0...v1.1.0) (2024-05-29)
+
+
+### Features
+
+* add retry for TXs ([34c70d1](https://github.com/warden-protocol/discord-faucet/commit/34c70d1ce7cfbd5220d96f935227e9a534c65e88))
+
 ## 1.0.0 (2024-05-29)
 
 
