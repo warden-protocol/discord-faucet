@@ -15,7 +15,6 @@ import (
 
 type Discord struct {
 	Session  *discordgo.Session
-	MC       *discordgo.MessageCreate
 	Token    string `env:"TOKEN" envDefault:""`
 	Requests map[string]time.Time
 	Faucet   faucet.Faucet
@@ -60,9 +59,6 @@ func (d *Discord) MessageCreate(s *discordgo.Session, m *discordgo.MessageCreate
 		return
 	}
 
-	d.Session = s
-	d.MC = m
-
 	if strings.Contains(m.Content, "$request") {
 		d.logger.Info().Msgf("user %s requested funds to %s", m.Author, m.Content)
 		addr := strings.Split(m.Content, "$request ")[1]
@@ -77,7 +73,7 @@ func (d *Discord) MessageCreate(s *discordgo.Session, m *discordgo.MessageCreate
 			if diff < d.Faucet.Cooldown {
 				waitTime := d.Faucet.Cooldown - diff
 				_, err := d.Session.ChannelMessageSend(
-					d.MC.ChannelID,
+					m.ChannelID,
 					fmt.Sprintf(":red_circle: user %s needs to wait for %v",
 						m.Author.Username,
 						waitTime,
@@ -104,7 +100,7 @@ func (d *Discord) MessageCreate(s *discordgo.Session, m *discordgo.MessageCreate
 			d.Requests[m.Author.Username] = time.Now()
 			d.Faucet.Requests[addr] = time.Now()
 		}
-		_, err = d.Session.ChannelMessageSend(d.MC.ChannelID, returnMsg)
+		_, err = d.Session.ChannelMessageSend(m.ChannelID, returnMsg)
 		if err != nil {
 			d.logger.Error().Err(err).Msgf("failed to send message")
 			return
