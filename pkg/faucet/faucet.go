@@ -24,9 +24,14 @@ type Faucet struct {
 	Denom       string `env:"DENOM" envDefault:"uward"`
 	Amount      string `env:"AMOUNT" envDefault:"10000000"`
 	Fees        string `env:"FEES" envDefault:"25uward"`
+	TXRetry     int    `env:"TX_RETRY" envDefault:"10"`
 	Requests    map[string]time.Time
 	Logger      zerolog.Logger
 }
+
+const (
+	waitTime = 2
+)
 
 type Out struct {
 	Stdout []byte
@@ -136,7 +141,7 @@ func InitFaucet() (Faucet, error) {
 	return f, nil
 }
 
-func (f *Faucet) Send(addr string) (string, error) {
+func (f *Faucet) Send(addr string, retry int) (string, error) {
 	if err := validAddress(addr); err != nil {
 		return "", err
 	}
@@ -188,8 +193,23 @@ func (f *Faucet) Send(addr string) (string, error) {
 	if err = json.Unmarshal(out.Stdout, &result); err != nil {
 		return "", fmt.Errorf("error unmarshalling tx result: %w", err)
 	}
+	if result.Code == 32 && retry < f.TXRetry {
+		f.Logger.Info().Msgf(
+			"tx failed with code %d for address %s, retrying (%d/%d)",
+			result.Code,
+			addr,
+			retry,
+			f.TXRetry,
+		)
+		time.Sleep(waitTime * time.Second)
+		return f.Send(addr, retry+1)
+	}
 	if result.Code != 0 {
-		return "", fmt.Errorf("tx failed with code %d", result.Code)
+		return "", fmt.Errorf(
+			"tx failed with code %d for address %s",
+			result.Code,
+			addr,
+		)
 	}
 
 	return result.TxHash, nil
