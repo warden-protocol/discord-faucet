@@ -10,7 +10,6 @@ RUN wget https://github.com/warden-protocol/wardenprotocol/releases/download/v0.
     && unzip /tmp/wardend.zip -d ./ \
     && rm /tmp/wardend.zip
 
-#FROM gcr.io/distroless/base-debian12:nonroot
 FROM ubuntu:22.04
 
 RUN apt-get update && apt-get install -y \
@@ -21,4 +20,3 @@ COPY discord-faucet /usr/bin/discord-faucet
 COPY --from=wardend /wardend /usr/bin/wardend
 
 CMD ["/usr/bin/discord-faucet"]
-#ENTRYPOINT ["ls", "-la", "/usr/bin"]
