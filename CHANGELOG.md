@@ -1,5 +1,17 @@
 # Changelog
 
+## [1.2.0](https://github.com/warden-protocol/discord-faucet/compare/v1.1.0...v1.2.0) (2024-06-05)
+
+
+### Features
+
+* add metrics to faucet ([033831c](https://github.com/warden-protocol/discord-faucet/commit/033831c11d5799c2037c239cd2af8e9c9aeccb30))
+
+
+### Bug Fixes
+
+* trim the address part from any extra spaces ([3228b20](https://github.com/warden-protocol/discord-faucet/commit/3228b20e1a0075be418ff08cec784daf1f5716de))
+
 ## [1.1.0](https://github.com/warden-protocol/discord-faucet/compare/v1.0.0...v1.1.0) (2024-05-29)
 
 
