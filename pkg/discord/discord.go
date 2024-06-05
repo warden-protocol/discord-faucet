@@ -66,7 +66,7 @@ func (d *Discord) MessageCreate(s *discordgo.Session, m *discordgo.MessageCreate
 
 func (d *Discord) requestFunds(m *discordgo.MessageCreate) {
 	d.logger.Info().Msgf("user %s requested funds to %s", m.Author, m.Content)
-	addr := strings.Split(m.Content, "$request ")[1]
+	addr := strings.TrimSpace(strings.Split(m.Content, "$request ")[1])
 	if addr == "" {
 		d.logger.Error().Msgf("missing address for user %s", m.Author)
 		return
