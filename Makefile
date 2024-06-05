@@ -22,7 +22,7 @@ go-mod-cache: go.sum
 
 .PHONY: build
 build: go.sum
-	go build -o build/discord-faucet ./cmd/discord-faucet/discord-faucet.go
+	go build -o build/discord-faucet ./cmd/discord-faucet/
 
 .PHONY: clean
 clean:
@@ -53,7 +53,7 @@ lint:
 update:
 	go get -u -d ./...
 	@go mod tidy
-	@go build -o "$(TMPDIR)/discord-faucet" cmd/discord-faucet/discord-faucet.go
+	@go build -o "$(TMPDIR)/discord-faucet" cmd/discord-faucet/
 	@git diff -- go.mod go.sum
 
 release-dryrun:

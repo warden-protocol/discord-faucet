@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"os"
 	"strings"
+	"sync"
 	"time"
 
 	"github.com/bwmarrin/discordgo"
@@ -13,12 +14,17 @@ import (
 	"github.com/warden-protocol/discord-faucet/pkg/faucet"
 )
 
+const (
+	defaultPurgeInterval = 10
+)
+
 type Discord struct {
-	Session  *discordgo.Session
-	Token    string `env:"TOKEN" envDefault:""`
-	Requests map[string]time.Time
-	Faucet   faucet.Faucet
-	logger   zerolog.Logger
+	Session       *discordgo.Session
+	Token         string `env:"TOKEN" envDefault:""`
+	PurgeInterval time.Duration
+	Requests      map[string]time.Time
+	Faucet        faucet.Faucet
+	logger        zerolog.Logger
 }
 
 func InitDiscord() (Discord, error) {
@@ -49,6 +55,16 @@ func InitDiscord() (Discord, error) {
 	}
 	d.Faucet.Logger = d.logger
 
+	interval := os.Getenv("PURGE_INTERVAL")
+	if interval == "" {
+		d.PurgeInterval = defaultPurgeInterval * time.Second
+	} else {
+		d.PurgeInterval, err = time.ParseDuration(interval)
+		if err != nil {
+			return Discord{}, err
+		}
+	}
+
 	return d, nil
 }
 
@@ -66,8 +82,10 @@ func (d *Discord) MessageCreate(s *discordgo.Session, m *discordgo.MessageCreate
 
 func (d *Discord) requestFunds(m *discordgo.MessageCreate) {
 	d.logger.Info().Msgf("user %s requested funds to %s", m.Author, m.Content)
+	reqCount.Inc()
 	addr := strings.TrimSpace(strings.Split(m.Content, "$request ")[1])
 	if addr == "" {
+		reqBad.Inc()
 		d.logger.Error().Msgf("missing address for user %s", m.Author)
 		return
 	}
@@ -87,6 +105,7 @@ func (d *Discord) requestFunds(m *discordgo.MessageCreate) {
 				d.logger.Error().Err(err).Msgf("failed to send message")
 				return
 			}
+			reqDenied.Inc()
 			return
 		}
 	}
@@ -94,6 +113,7 @@ func (d *Discord) requestFunds(m *discordgo.MessageCreate) {
 	var returnMsg string
 	tx, err := d.Faucet.Send(addr, 1)
 	if err != nil {
+		reqFailed.Inc()
 		d.logger.Error().Err(err).Msgf("failed to send funds to %s", addr)
 		returnMsg = fmt.Sprintf(":red_circle: %s", err)
 	} else {
@@ -104,10 +124,47 @@ func (d *Discord) requestFunds(m *discordgo.MessageCreate) {
 		)
 		d.Requests[m.Author.Username] = time.Now()
 		d.Faucet.Requests[addr] = time.Now()
+		usersCooldown.Inc()
 	}
 	_, err = d.Session.ChannelMessageSend(m.ChannelID, returnMsg)
 	if err != nil {
 		d.logger.Error().Err(err).Msgf("failed to send message")
 		return
+	}
+}
+
+func (d *Discord) purgeExpiredEntries() {
+	var mu sync.Mutex
+	mu.Lock()
+	defer mu.Unlock()
+
+	now := time.Now()
+	for k, v := range d.Requests {
+		diff := now.Sub(v)
+		if diff > d.Faucet.Cooldown {
+			usersCooldown.Sub(1)
+			delete(d.Requests, k)
+			d.logger.Info().Msgf("purged entry for key: %s", k)
+		}
+	}
+	for k, v := range d.Faucet.Requests {
+		diff := now.Sub(v)
+		if diff > d.Faucet.Cooldown {
+			delete(d.Faucet.Requests, k)
+			d.logger.Info().Msgf("purged entry for key: %s", k)
+		}
+	}
+}
+
+//nolint:gosimple // need a while loop for this
+func (d *Discord) StartPurgeRoutine() {
+	ticker := time.NewTicker(d.PurgeInterval)
+	defer ticker.Stop()
+
+	for {
+		select {
+		case <-ticker.C:
+			d.purgeExpiredEntries()
+		}
 	}
 }
