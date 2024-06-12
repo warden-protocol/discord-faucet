@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.3.0](https://github.com/warden-protocol/discord-faucet/compare/v1.2.0...v1.3.0) (2024-06-12)
+
+
+### Features
+
+* adding more logging and fixing mutex locks ([3150210](https://github.com/warden-protocol/discord-faucet/commit/31502108cb29c994ce70b4f81b5d08b9f6a1fc35))
+
 ## [1.2.0](https://github.com/warden-protocol/discord-faucet/compare/v1.1.0...v1.2.0) (2024-06-05)
 
 
