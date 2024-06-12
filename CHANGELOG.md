@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.3.1](https://github.com/warden-protocol/discord-faucet/compare/v1.3.0...v1.3.1) (2024-06-12)
+
+
+### Bug Fixes
+
+* initialise mutex ([7f9166b](https://github.com/warden-protocol/discord-faucet/commit/7f9166b03df88be1e0ba81824d0a6ad9bc1f0e3b))
+
 ## [1.3.0](https://github.com/warden-protocol/discord-faucet/compare/v1.2.0...v1.3.0) (2024-06-12)
 
 
