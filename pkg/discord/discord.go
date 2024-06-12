@@ -25,6 +25,7 @@ type Discord struct {
 	Requests      map[string]time.Time
 	Faucet        faucet.Faucet
 	logger        zerolog.Logger
+	*sync.Mutex
 }
 
 func InitDiscord() (Discord, error) {
@@ -42,6 +43,8 @@ func InitDiscord() (Discord, error) {
 	if d.Token == "" {
 		return Discord{}, fmt.Errorf("missing discord token")
 	}
+
+	d.logger.Info().Msg("initialising discord connection")
 	d.Session, err = discordgo.New("Bot " + d.Token)
 	if err != nil {
 		return Discord{}, err
@@ -49,6 +52,7 @@ func InitDiscord() (Discord, error) {
 
 	d.Requests = make(map[string]time.Time)
 
+	d.logger.Info().Msg("initialising faucet")
 	d.Faucet, err = faucet.InitFaucet()
 	if err != nil {
 		return Discord{}, err
@@ -134,9 +138,8 @@ func (d *Discord) requestFunds(m *discordgo.MessageCreate) {
 }
 
 func (d *Discord) purgeExpiredEntries() {
-	var mu sync.Mutex
-	mu.Lock()
-	defer mu.Unlock()
+	d.Lock()
+	defer d.Unlock()
 
 	now := time.Now()
 	for k, v := range d.Requests {
