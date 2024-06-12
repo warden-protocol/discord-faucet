@@ -31,7 +31,9 @@ type Discord struct {
 func InitDiscord() (Discord, error) {
 	var err error
 
-	d := Discord{}
+	d := Discord{
+		Mutex: &sync.Mutex{},
+	}
 	if err = env.Parse(&d); err != nil {
 		return Discord{}, err
 	}
