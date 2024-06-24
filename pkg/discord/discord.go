@@ -3,6 +3,7 @@ package discord
 import (
 	"fmt"
 	"os"
+	"regexp"
 	"strings"
 	"sync"
 	"time"
@@ -89,7 +90,8 @@ func (d *Discord) MessageCreate(s *discordgo.Session, m *discordgo.MessageCreate
 func (d *Discord) requestFunds(m *discordgo.MessageCreate) {
 	d.logger.Info().Msgf("user %s requested funds to %s", m.Author, m.Content)
 	reqCount.Inc()
-	addr := strings.TrimSpace(strings.Split(m.Content, "$request ")[1])
+	re := regexp.MustCompile(`warden[0-9a-zA-Z]+`)
+	addr := re.FindString(m.Content)
 	if addr == "" {
 		reqBad.Inc()
 		d.logger.Error().Msgf("missing address for user %s", m.Author)
