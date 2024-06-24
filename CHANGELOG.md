@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.3.2](https://github.com/warden-protocol/discord-faucet/compare/v1.3.1...v1.3.2) (2024-06-24)
+
+
+### Bug Fixes
+
+* not able to handle linebreaks ([c975568](https://github.com/warden-protocol/discord-faucet/commit/c975568d62bf5f48fcb88d0654549db3cccc9322))
+
 ## [1.3.1](https://github.com/warden-protocol/discord-faucet/compare/v1.3.0...v1.3.1) (2024-06-12)
 
 
