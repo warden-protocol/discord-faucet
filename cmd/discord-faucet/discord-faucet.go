@@ -11,6 +11,7 @@ import (
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 	log "github.com/rs/zerolog"
 
+	"github.com/warden-protocol/discord-faucet/pkg/config"
 	"github.com/warden-protocol/discord-faucet/pkg/discord"
 )
 
@@ -23,7 +24,14 @@ func main() {
 		log.ConsoleWriter{Out: os.Stderr, TimeFormat: time.RFC3339},
 	).Level(log.InfoLevel).With().Timestamp().Logger()
 
-	discordBot, err := discord.InitDiscord()
+	// load configuration
+	config, err := config.LoadConfig()
+	if err != nil {
+		logger.Fatal().Err(err).Msg("Failed to load configuration")
+	}
+
+	// init discordbot
+	discordBot, err := discord.InitDiscord(config)
 	if err != nil {
 		logger.Fatal().Err(err).Msg("Failed to initialize discord bot")
 	}
@@ -40,14 +48,9 @@ func main() {
 
 	http.Handle("/metrics", promhttp.Handler())
 
-	port := os.Getenv("PORT")
-	if port == "" {
-		port = "8081"
-	}
-
-	logger.Info().Msgf("starting metrics server on port %s", port)
+	logger.Info().Msgf("starting metrics server on port %s", config.Port)
 	server := &http.Server{
-		Addr:              ":" + port,
+		Addr:              ":" + config.Port,
 		ReadHeaderTimeout: serverTimeout * time.Second,
 	}
 

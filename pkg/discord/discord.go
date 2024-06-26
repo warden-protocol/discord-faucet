@@ -12,16 +12,13 @@ import (
 	"github.com/caarlos0/env/v9"
 	"github.com/rs/zerolog"
 
+	"github.com/warden-protocol/discord-faucet/pkg/config"
 	"github.com/warden-protocol/discord-faucet/pkg/faucet"
-)
-
-const (
-	defaultPurgeInterval = 10
 )
 
 type Discord struct {
 	Session       *discordgo.Session
-	Token         string `env:"TOKEN" envDefault:""`
+	Token         string
 	PurgeInterval time.Duration
 	Requests      map[string]time.Time
 	Faucet        faucet.Faucet
@@ -29,11 +26,12 @@ type Discord struct {
 	*sync.Mutex
 }
 
-func InitDiscord() (Discord, error) {
+func InitDiscord(config config.Config) (Discord, error) {
 	var err error
 
 	d := Discord{
 		Mutex: &sync.Mutex{},
+		Token: config.Token,
 	}
 	if err = env.Parse(&d); err != nil {
 		return Discord{}, err
@@ -56,20 +54,15 @@ func InitDiscord() (Discord, error) {
 	d.Requests = make(map[string]time.Time)
 
 	d.logger.Info().Msg("initialising faucet")
-	d.Faucet, err = faucet.InitFaucet()
+	d.Faucet, err = faucet.InitFaucet(config)
 	if err != nil {
 		return Discord{}, err
 	}
 	d.Faucet.Logger = d.logger
 
-	interval := os.Getenv("PURGE_INTERVAL")
-	if interval == "" {
-		d.PurgeInterval = defaultPurgeInterval * time.Second
-	} else {
-		d.PurgeInterval, err = time.ParseDuration(interval)
-		if err != nil {
-			return Discord{}, err
-		}
+	d.PurgeInterval, err = time.ParseDuration(config.PurgeInterval)
+	if err != nil {
+		return Discord{}, err
 	}
 
 	return d, nil
@@ -126,7 +119,9 @@ func (d *Discord) requestFunds(m *discordgo.MessageCreate) {
 		returnMsg = fmt.Sprintf(":red_circle: %s", err)
 	} else {
 		returnMsg = fmt.Sprintf(
-			":white_check_mark: 10 WARD sent to address %s \n %s",
+			":white_check_mark: %s %s sent to address %s \n %s",
+			d.Faucet.Amount,
+			d.Faucet.Denom,
 			addr,
 			fmt.Sprintf("https://testnet.warden.explorers.guru/transaction/%s", tx),
 		)
