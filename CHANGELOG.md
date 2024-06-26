@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.4.0](https://github.com/warden-protocol/discord-faucet/compare/v1.3.2...v1.4.0) (2024-06-26)
+
+
+### Features
+
+* add config file support ([b3c03ee](https://github.com/warden-protocol/discord-faucet/commit/b3c03eec20b931dcf72c19e7e333ed31a57ded84))
+
 ## [1.3.2](https://github.com/warden-protocol/discord-faucet/compare/v1.3.1...v1.3.2) (2024-06-24)
 
 
