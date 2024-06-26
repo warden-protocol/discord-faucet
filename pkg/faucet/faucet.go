@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
-	"os"
 	"os/exec"
 	"strings"
 	"time"
@@ -12,19 +11,21 @@ import (
 	"github.com/caarlos0/env/v9"
 	"github.com/cosmos/cosmos-sdk/types/bech32"
 	"github.com/rs/zerolog"
+
+	"github.com/warden-protocol/discord-faucet/pkg/config"
 )
 
 type Faucet struct {
 	Cooldown    time.Duration
-	Mnemonic    string `env:"MNEMONIC" envDefault:""`
-	Node        string `env:"NODE" envDefault:"https://rpc.buenavista.wardenprotocol.org:443"`
-	ChainID     string `env:"CHAIN_ID" envDefault:"buenavista-1"`
-	CliName     string `env:"CLI_NAME" envDefault:"wardend"`
-	AccountName string `env:"ACCOUNT_NAME" envDefault:"faucet"`
-	Denom       string `env:"DENOM" envDefault:"uward"`
-	Amount      string `env:"AMOUNT" envDefault:"10000000"`
-	Fees        string `env:"FEES" envDefault:"25uward"`
-	TXRetry     int    `env:"TX_RETRY" envDefault:"10"`
+	Mnemonic    string
+	Node        string
+	ChainID     string
+	CliName     string
+	AccountName string
+	Denom       string
+	Amount      string
+	Fees        string
+	TXRetry     int
 	Requests    map[string]time.Time
 	Logger      zerolog.Logger
 }
@@ -36,14 +37,6 @@ const (
 type Out struct {
 	Stdout []byte
 	Stderr []byte
-}
-
-func envOrDefault(key, defaultValue string) string {
-	v := os.Getenv(key)
-	if v == "" {
-		return defaultValue
-	}
-	return v
 }
 
 func execute(cmdString string) (Out, error) {
@@ -115,15 +108,25 @@ func validAddress(addr string) error {
 	return nil
 }
 
-func InitFaucet() (Faucet, error) {
+func InitFaucet(config config.Config) (Faucet, error) {
 	var err error
 
-	f := Faucet{}
+	f := Faucet{
+		Mnemonic:    config.Mnemonic,
+		Node:        config.Node,
+		ChainID:     config.ChainID,
+		CliName:     config.CliName,
+		AccountName: config.AccountName,
+		Denom:       config.Denom,
+		Amount:      config.Amount,
+		Fees:        config.Fees,
+		TXRetry:     config.TXRetry,
+	}
 	if err = env.Parse(&f); err != nil {
 		return Faucet{}, err
 	}
 
-	f.Cooldown, err = time.ParseDuration(envOrDefault("COOLDOWN", "12h"))
+	f.Cooldown, err = time.ParseDuration(config.CoolDown)
 	if err != nil {
 		return Faucet{}, err
 	}
