@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.5.0](https://github.com/warden-protocol/discord-faucet/compare/v1.4.0...v1.5.0) (2024-09-25)
+
+
+### Features
+
+* possibility to use different decimals ([a724eb4](https://github.com/warden-protocol/discord-faucet/commit/a724eb43cf956e3977f478288fb712b6f7809326))
+
 ## [1.4.0](https://github.com/warden-protocol/discord-faucet/compare/v1.3.2...v1.4.0) (2024-06-26)
 
 
