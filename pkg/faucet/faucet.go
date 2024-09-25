@@ -160,9 +160,8 @@ func (f *Faucet) Send(addr string, retry int) (string, error) {
 		}
 	}
 
-	f.Logger.Info().Msgf("sending %s%s to %v", f.Amount, f.Denom, addr)
-
 	amount := f.Amount + strings.Repeat("0", f.Decimals) + f.Denom
+	f.Logger.Info().Msgf("sending %s to %v", amount, addr)
 
 	cmd := strings.Join([]string{
 		f.CliName,

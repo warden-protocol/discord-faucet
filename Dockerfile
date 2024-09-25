@@ -6,7 +6,7 @@ RUN apt-get update && apt-get install -y \
     unzip \
     && rm -rf /var/lib/apt/lists/*
 
-RUN wget https://github.com/warden-protocol/wardenprotocol/releases/download/v0.3.0/wardend_Linux_x86_64.zip -O /tmp/wardend.zip \
+RUN wget https://github.com/warden-protocol/wardenprotocol/releases/download/v0.5.0/wardend_Linux_x86_64.zip -O /tmp/wardend.zip \
     && unzip /tmp/wardend.zip -d ./ \
     && rm /tmp/wardend.zip
 
