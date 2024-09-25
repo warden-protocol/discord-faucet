@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.5.1](https://github.com/warden-protocol/discord-faucet/compare/v1.5.0...v1.5.1) (2024-09-25)
+
+
+### Bug Fixes
+
+* update wardend to support new version of wardend ([c21d5b1](https://github.com/warden-protocol/discord-faucet/commit/c21d5b1b046172d76752880d57bc61338068adb1))
+
 ## [1.5.0](https://github.com/warden-protocol/discord-faucet/compare/v1.4.0...v1.5.0) (2024-09-25)
 
 
