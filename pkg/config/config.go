@@ -22,13 +22,14 @@ type Config struct {
 	Token         string `env:"TOKEN" envDefault:"" mapstructure:"TOKEN"`
 	PurgeInterval string `env:"PURGE_INTERVAL" envDefault:"10s" mapstructure:"PURGE_INTERVAL"`
 	Mnemonic      string `env:"MNEMONIC" envDefault:"" mapstructure:"MNEMONIC"`
-	Node          string `env:"NODE" envDefault:"https://rpc.buenavista.wardenprotocol.org:443" mapstructure:"NODE"`
-	ChainID       string `env:"CHAIN_ID" envDefault:"buenavista-1" mapstructure:"CHAIN_ID"`
+	Node          string `env:"NODE" envDefault:"https://rpc.chiado.wardenprotocol.org:443" mapstructure:"NODE"`
+	ChainID       string `env:"CHAIN_ID" envDefault:"chiado_10010-1" mapstructure:"CHAIN_ID"`
 	CliName       string `env:"CLI_NAME" envDefault:"wardend" mapstructure:"CLI_NAME"`
 	AccountName   string `env:"ACCOUNT_NAME" envDefault:"faucet" mapstructure:"ACCOUNT_NAME"`
-	Denom         string `env:"DENOM" envDefault:"uward" mapstructure:"DENOM"`
-	Amount        string `env:"AMOUNT" envDefault:"10000000" mapstructure:"AMOUNT"`
-	Fees          string `env:"FEES" envDefault:"25uward" mapstructure:"FEES"`
+	Denom         string `env:"DENOM" envDefault:"award" mapstructure:"DENOM"`
+	Amount        string `env:"AMOUNT" envDefault:"10" mapstructure:"AMOUNT"`
+	Decimal       int    `env:"DECIMAL" envDefault:"18" mapstructure:"DECIMAL"`
+	Fees          string `env:"FEES" envDefault:"25000000000000award" mapstructure:"FEES"`
 	TXRetry       int    `env:"TX_RETRY" envDefault:"10" mapstructure:"TX_RETRY"`
 	CoolDown      string `env:"COOLDOWN" envDefault:"10s" mapstructure:"COOLDOWN"`
 }

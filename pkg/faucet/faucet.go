@@ -28,6 +28,7 @@ type Faucet struct {
 	TXRetry     int
 	Requests    map[string]time.Time
 	Logger      zerolog.Logger
+	Decimals    int
 }
 
 const (
@@ -121,6 +122,7 @@ func InitFaucet(config config.Config) (Faucet, error) {
 		Amount:      config.Amount,
 		Fees:        config.Fees,
 		TXRetry:     config.TXRetry,
+		Decimals:    config.Decimal,
 	}
 	if err = env.Parse(&f); err != nil {
 		return Faucet{}, err
@@ -160,7 +162,7 @@ func (f *Faucet) Send(addr string, retry int) (string, error) {
 
 	f.Logger.Info().Msgf("sending %s%s to %v", f.Amount, f.Denom, addr)
 
-	amount := f.Amount + f.Denom
+	amount := f.Amount + strings.Repeat("0", f.Decimals) + f.Denom
 
 	cmd := strings.Join([]string{
 		f.CliName,
