@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.6.0](https://github.com/warden-protocol/discord-faucet/compare/v1.5.1...v1.6.0) (2024-11-05)
+
+
+### Features
+
+* run as non root user warden ([93a5695](https://github.com/warden-protocol/discord-faucet/commit/93a5695f2dbf1cd34319d6678b8f487dccd596a8))
+
 ## [1.5.1](https://github.com/warden-protocol/discord-faucet/compare/v1.5.0...v1.5.1) (2024-09-25)
 
 
